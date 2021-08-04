@@ -1,47 +1,56 @@
 #include <iostream>
 #define LEV (1<<17)
+#define MAX 100005
 using namespace std;
 
 typedef long long LL;
-LL tree[LEV * 2];
-int n, q;
-void update(int n, int v){
-	n += LEV;
-	tree[n] = v;
-	n /= 2;
-	while(n>0){
-		tree[n] = tree[n *2] + tree[n*2+1];
-		n /= 2;	
+LL tree[LEV*2];
+LL arr[MAX];
+LL init(int node, int s, int e, int idx, LL val){
+	
+	if(idx < s || idx > e) return 0;
+	if(s == e) return tree[node] = val;
+	else{
+		init(node*2,s,(s+e)/2,idx,val) + init(node*2+1,(s+e)/2+1,e,idx,val);
+		return tree[node] = tree[node * 2] + tree[node * 2 +1];
 	}
 }
-LL query(int l, int r){
+void update(int node, int s, int e, int idx, LL diff){
 	
-	l += LEV, r += LEV;
-	LL res = 0;
-	while(l <= r){
-		if(l % 2 == 1) res += tree[l++];
-		if(r % 2 == 0) res += tree[r--];
-		l /= 2, r /= 2;
+	if(idx < s || e < idx) return;
+	tree[node] += diff;
+	if(s != e){
+		update(node * 2, s, (s+e)/2, idx, diff );
+		update(node * 2 + 1 , (s+e)/2+1, e, idx, diff);
 	}
-	return res;
+}
+LL query(int node, int s, int e, int l, int r){
+	
+	if(r < s || e < l) return 0;
+	if(l <= s && e <= r) return tree[node];
+	else{
+		return query(node *2, s, (s+e)/2, l,r) + query(node * 2+1, (s+e)/2+1, e, l, r);
+	}
 }
 int main(){
 	
-	cin >> n >> q;
-	for(int i = 0; i < n; i++){
-		int val;
-		cin >> val;
-		update(i+1, val);
+	int n, q;
+	scanf("%d %d", &n, &q);
+	for(int i = 1; i <= n; i++){
+		scanf("%lld ", &arr[i]);
+		init(1,1, MAX, i, arr[i]);
 	}
-	
-	// ÅÏ °³¼ö
+
 	for(int i = 0; i < q; i++){
-		int x, y, a, b;
-		cin >> x >> y >> a >> b;
+		int x, y;
+		LL a, b;
+		scanf("%d %d %lld %lld",&x,&y,&a,&b);
 		if(x > y)
-			cout << query(y,x) << '\n';
+			printf("%lld\n",query(1,1,MAX,y,x));
 		else	
-			cout << query(x,y) << '\n';
-		update(a,b); 
+			printf("%lld\n",query(1,1,MAX,x,y));
+		LL diff = b - arr[a];
+		arr[a] = b;
+		update(1,1,MAX,a,diff); 
 	}	
 }
