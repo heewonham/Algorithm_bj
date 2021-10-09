@@ -122,93 +122,83 @@ ab가 더 크면 ab를 줄이고 합의 개수를 구한다.
 
 ## 세그먼트 트리
 
-`// 찾기` 
+> 찾기
 
-`int seg(int node, int s, int e, int l, int r){`
+``` c++
+// 찾기
+int seg(int node, int s, int e, int l, int r){
+    // 범위를 벗어난 경우
+	if( r  < s  || e < l) return ;
 
-​	`// 범위를 벗어난 경우`
+	// 범위 이내인 경우
+    if( l <= s && e <= r) return node;
+	// 범위를 살짝 초과한 경우 - 다시 질문가능
+	else{
+		return seg(node * 2, s, (s+e) / 2 , l , r) + seg(node * 2 + 1 , (s+e ) / 2 +1, e, l , r);
+    }
+}
+```
 
-​	`if( r  < s  || e < l) return ;`
+> update
 
-​	`// 범위 이내인 경우`
+```
+// update
+void update(int node, int s, int e, int idx, int val){
+	if(idx < s || e < idx ) return ;
+	
+	if (s == e ) tr[node] = val;
+	else{
+		update(node * 2, s, (s+e)/2, idx, val);
+		update(node * 2 + 1 , (s+e)/2 + 1, e, idx, val);
+		tr[node] = tr[node * 2] + tr[node*2 + 1];
+		}
+}
+```
 
-​	`if( l <= s && e <= r) return node;`
 
-​	`// 범위를 살짝 초과한 경우 - 다시 질문가능`
-
-​	`else{`
-
-​		`return seg(node * 2, s, (s+e) / 2 , l , r) + seg(node * 2 + 1 , (s+e ) / 2 +1, e, l , r);`
-
-​	`}`
-
-`}`
-
-
-
-`// update`
-
-`void update(int node, int s, int e, int idx, int val){`
-
-​	`if(idx < s || e < idx ) return ;`
-
-​	`if (s == e ) tr[node] = val;`
-
-​	`else`{
-
-​		`update(node * 2, s, (s+e)/2, idx, val);`
-
-​		`update(node * 2 + 1 , (s+e)/2 + 1, e, idx, val);`
-
-​		`tr[node] = tr[node * 2] + tr[node*2 + 1];`
-
-​	`}`
-
-`}`
 
 
 
 ## 인덱스 트리
 
-`// update`
+> update
 
-`void update(int num, int val){`
+``` c++
+// update
+void update(int num, int val){
+	num += PIV
+	tree[num] = val;
+	n /= 2;
 
-​	`num += PIV`
+	while(n){
+		tree[n] = tree[n*2] + tree[n*2+1];
+		n /= 2;
+	}
+}
+```
 
-​	`tree[num] = val;`
 
-​	`n /= 2;`
 
-​	`while(n){`
+> query
 
-​		`tree[n] = tree[n*2] + tree[n*2+1]`
+``` c++
+int query(int l, int r){
 
-​		`n /= 2;`
+    l += PIV; r += PIV;
+    int ret = 0;
 
-​	`}`
+	while(l <= r){
 
-`}`
+		(l%2 == 1) ret += tree[l++];
+        (r%2 == 0) ret += tree[r--];
+        l /=2, r /= 2;	
+    }
 
-`int query(int l, int r){`
+	return ret;
+}
+```
 
-​	`l += PIV; r += PIV;`
 
-​	`int ret = 0;`
-
-​	`while(l <= r){`
-
-​		`(l%2 == 1) ret += tree[l++];`
-
-​		`(r%2 == 0) ret += tree[r--];`
-
-​		`l /=2, r /= 2;`		
-
-​	`}`
-
-​	`return ret;`
-
-`}`
 
 
 
