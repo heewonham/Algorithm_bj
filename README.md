@@ -307,3 +307,102 @@ int query(int l, int r){
 
 * 이 문제의 포인트는 BFS로 구한 최단 거리의 path를 어떻게 출력하는지의 초점이 있었다,
 * 해결책은 처음 visited가 true가 된 시점은 그 지점에 먼저 갈 수 있는 루트임으로 이동할 때 parent의 노드로 기록해두면 나중에 역추적하기 쉽다.
+
+
+
+## # 1450 knapsack 문제 - 이분탐색, 경우의 수
+
+1. n / 2 로 나눈다 
+2. 각 배열 조합 구하기 (가능한 무게)
+3. 두 배열로 경우의수 구하기 (upper bound 활용)
+
+
+
+> 예 : 
+>
+> 6 6
+>
+> 1 2 3 1 2 3 
+>
+> 왼쪽 배열(1, 2, 3)의 가능한 무게는 0, 1, 2, 3, 3, 4, 5, 6 이고 가능한 조합은 8개이다.
+>
+> 오른쪽 배열(1, 2 ,3) 역시 왼쪽 배열과 똑같다.
+>
+> 
+>
+> 그 다음, 
+>
+> 왼쪽 배열을 기준으로 오른쪽 배열의 수 중 6이라는 범위내에 합칠 수 있는 개수를 센다.
+>
+> 왼쪽 배열의 0의 경우는 오른쪽 배열에서 합칠 수 있는 수는 모두 가능하기 때문에 : 8개
+>
+> 왼쪽 배열의 1의 경우는 오른쪽 배열에서 합칠 수 있는 수 : 7 개
+>
+> :
+>
+> :
+>
+> 왼쪽 배열의 5의 경우 오른쪽 배열에서 합칠 수 있는 수 : 2 개(0, 1)
+>
+> 왼쪽 배열의 6의 경우 오른쪽 배열에서 합칠 수 있는 수 : 1개 (0)
+>
+> 
+>
+> 그러므로
+>
+> 즉, 0 -> 8개, 1 -> 7개, 2 -> 6개, 3 -> 5개, 3-> 5개, 4 -> 3개, 5 -> 2개, 6 - > 1개
+>
+> 를 합친 개수는 37로 경우의 수는 37이다. 
+
+
+
+### java로 lowerbound, upperbound 구하기
+
+#### lowerbound
+
+* 범위 안의 원소들 중 특정 target보다 **크거나 같은 첫번째의 원소의 인덱스**
+
+``` java
+private static int lowerBound(List<Integer> data, int target) {
+    int begin = 0;
+    int end = data.size();
+    
+    while(begin < end) {
+    	int mid = (begin + end) / 2;
+        
+        if(data.get(mid) >= target) {
+        	end = mid;
+        }
+        else {
+        	begin = mid + 1;
+        }
+    }
+    return end;
+}
+```
+
+
+
+#### upper_bound
+
+* 범위 안의 원소들 중 특정 **target보다 큰** 첫번째 원소의 인덱스
+
+```java
+private static int upperBound(List<Integer> data, int target) {
+    int begin = 0;
+    int end = data.size();
+    
+    while(begin < end) {
+    	int mid = (begin + end) / 2;
+        
+        if(data.get(mid) <= target) {
+        	begin = mid + 1;
+        }
+        else {
+        	end = mid;
+        }
+    }
+    return end;
+}
+```
+
