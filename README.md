@@ -420,3 +420,171 @@ private static int upperBound(List<Integer> data, int target) {
 전제는 보통의 dfs처럼 청소할 공간이 없으면 위치로 돌아가는 것이 아니라 **후진**을 하는 것이다. 단, 후진은 청소를 했든 안했든 상관없이 벽만 아니면 가능하다.
 
 그리고 청소를 하는 경우는 맨 처음 출발하는 경우와 `2-1인 경우`에만 가능하다는 걸 주의해야한다. 즉, 후진을 할 때, 청소가 되어있지 않아도 청소를 하지 않고 `왼쪽방향부터 탐색`해 들어가야 한다. 
+
+
+
+### 프로그래머스 - 신규아이디 추천(정규표현식)
+
+이 문제는 정규 표현식을 알지 못하면 복잡하게 풀어야하는 그런 문제이다.
+
+`^` : 문자열의 시작
+
+`$` : 문자열의 종료
+
+`.` : 임의의 한 문자
+
+`[]` 문자 클래스 : 문자클래스에 들어간 문자는 하나의 문자로 취급된다.
+
+* 문자 클래스에서 `^` not을 의미한다.
+* 문자 클래스에서 `-` 즉, a-z는 a에서 z까지의 문자를 말한다.
+
+`[^-_.a-z0-9]` : `-`, `_` , `.`, a에서 z, 0에서 9 가 `아니면` 이라는 뜻이다.
+
+
+
+- `?`: 앞 문자가 없거나 하나 있음
+- `+`: 앞 문자가 1개 이상임
+- `*`: 앞 문자가 0개 이상임
+
+- `{n,m`}: 앞 문자가 `n`개 이상 `m`개 이하. `{0,1`}은 `?`와 같은 의미다.
+- `{n,`}: 앞 문자가 `n`개 이상. 위의 형태에서 `m`이 생략된 형태이다. `{0,`}이면 `*`와 같고 `{1,`}이면 `+`와 같은 의미이다.
+- `{n`}: 앞 문자가 정확히 `n`개. `{n,n`}과 같은 의미이다.
+
+예를 들어,
+
+`[.]{2,}` : `.`이라는 문자 클래스가 2개 이상 것
+
+`^[.]|[.$]` : 시작이 `.`이거나 끝이 `.`인 경우 
+
+
+
+#### 내가 풀었던 방식
+
+```java
+class Solution {
+    public String solution(String new_id) {
+        String answer = "";
+
+        answer = new_id.toLowerCase(); // 1case
+        answer = twoCase(answer); // 2case
+        answer = threeCase(answer); // 3case
+        answer = firstCheck(answer); // 4case : 첫번째문자열  
+        answer = lastCheck(answer); // 4case : 마지막문자열
+           
+        // 5. 아이디가 빈 문자열이면 a 대입
+        if(answer.length() == 0){
+            answer = "a";
+        }
+        
+        // 6. 16자이상이라면 15자까지 저장
+        if(answer.length() >= 16){
+            answer = answer.substring(0,15);
+        }
+        answer = lastCheck(answer); // 마지막 문자열
+        
+        // 7. 두글자 이하면 마지막 글자를 길이 3이될때까지 추가
+        if(answer.length() <= 2){
+            char last = answer.charAt(answer.length()-1);
+            for(int i = answer.length(); i < 3; i++){
+                answer += Character.toString(last);
+            }
+        }
+        return answer;
+    }
+    
+    boolean checkOk(char ch){
+        if(ch-'0' >= 49 && ch-'0' <= 74){
+            return true;
+        } else if(ch-'0' >= 0 && ch-'0' <= 9 ){
+            return true;
+        } else if(ch == '-') {
+            return true;
+        } else if(ch == '_'){
+            return true;
+        } else if(ch == '.'){
+            return true;
+        } else{
+            return false;
+        }
+    }
+    
+    String twoCase(String str){
+        // 2. 소문자, 숫자, 빼기, 밑줄, 마침표 제외 모두 제거
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < str.length(); i++){
+            char ch = str.charAt(i);
+            if(checkOk(ch)){
+                sb.append(Character.toString(ch));
+            }
+        }
+        return sb.toString();   
+    }
+    String threeCase(String str){
+        // 3. 마침표 2번 이상 -> 하나로
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < str.length(); i++){
+            char ch = str.charAt(i);
+            if(ch == '.'){
+                int j = i;
+                for(; j < str.length(); j++){
+                    if(str.charAt(j) != '.') break;
+                }
+                sb.append(".");
+                i = j-1;
+            } else{
+                sb.append(Character.toString(ch));
+            }
+        }
+        return sb.toString();   
+    }
+    String firstCheck(String str){
+        int len = str.length();
+        if(len > 0 && str.charAt(0) == '.'){
+            str = str.substring(1);
+        }
+        return str;
+    }
+    
+    String lastCheck(String str){
+        int len = str.length();
+        if(len > 0 && str.charAt(len-1) == '.'){
+            str = str.substring(0,len-1);
+        }
+        return str;
+    }
+}
+```
+
+
+
+#### 정규표현식으로 표현된 방식
+
+```java
+class Solution {
+    public String solution(String new_id) {
+        String answer = "";
+        String temp = new_id.toLowerCase();
+
+        temp = temp.replaceAll("[^-_.a-z0-9]","");
+        System.out.println(temp);
+        temp = temp.replaceAll("[.]{2,}",".");
+        temp = temp.replaceAll("^[.]|[.]$","");
+        System.out.println(temp.length());
+        if(temp.equals(""))
+            temp+="a";
+        if(temp.length() >=16){
+            temp = temp.substring(0,15);
+            temp=temp.replaceAll("^[.]|[.]$","");
+        }
+        if(temp.length()<=2)
+            while(temp.length()<3)
+                temp+=temp.charAt(temp.length()-1);
+
+        answer=temp;
+        return answer;
+    }
+}
+```
+
+엄청난 길이의 차이를 볼 수 있다.
+
