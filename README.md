@@ -588,3 +588,27 @@ class Solution {
 
 엄청난 길이의 차이를 볼 수 있다.
 
+
+
+### 프로그래머스 - H-Index **
+
+어떤 과학자가 발표한 n편 중 h번 이상 인용된 논문이 h편 이상이고, 나머지가 h이하로 인용된 경우 과학자의 H-Index이다.
+
+* n : 1~1,000
+* 논문별 인용 횟수 : 0 ~ 10,000
+
+H-Index의 최대값은 n의 최대값이다.
+
+그러므로 sort를 진행 후 ,  
+
+```java
+        for(int i = 0; i < len; i++){
+            int cnt = len - i; 
+            if(citations[i] >= cnt){
+                return cnt;
+            }
+        }
+```
+
+
+
